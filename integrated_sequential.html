@@ -1,23 +1,9 @@
-<!DOCTYPE html>
-<div id="log"></div>
-<html onload="init()">
-    <!-- <script src="webgazer.js" type="text/javascript"></script>
-    <script src="main.js" type="text/javascript"></script> -->
-    <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+<!doctype html>
+  <head>
+    <script src="jquery-3.6.0.min.js"></script>
+    <script src="webgazer.js" type="text/javascript"></script>
+    <script src="main.js" type="text/javascript"></script>
     <script>
-        //the html viewer i'm using doesn't let me see the console
-        //so we use this instead lol 
-        (function () {
-            var old = console.log;
-            var logger = document.getElementById('log');
-            console.log = function (message) {
-                if (typeof message == 'object') {
-                    logger.innerHTML += (JSON && JSON.stringify ? JSON.stringify(message) : message) + '<br />';
-                } else {
-                    logger.innerHTML += message + '<br />';
-                }
-            }
-        })();
         //global variables sprinkled with some constants because this is a hackathon
         state = 0;
 
@@ -55,7 +41,7 @@
 
         //runs at startup, sets up some friendly constants
         function init(){
-            canvas = document.getElementById("canvas");
+            canvas = document.getElementById("game");
             ctx = canvas.getContext('2d');
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -66,13 +52,15 @@
                     positionsSet[2*i+j] = [width*i*0.3333, height*j*0.5+height*0.05];
                 }
             }
-            // Call this 20fps
+            // Call this 30fps
             window.setInterval(function(){
                 loop();
-            }, 1000 / 20)
+            }, 1000 / 30)
         }
 
         function loop(){
+          cursorPos = [getX(), getY()]
+		console.log(cursorPos);
             //figure out which box the cursor is in
             hoverIdx = -1;
             for(i=0; i<=5; i++){
@@ -110,13 +98,13 @@
                     if(char == '_'){
                         char = ' ';
                     } else if(hoverIdx == 1 && state == 6){ // backspace
-                        console.log("BACKSPACE!");
-                        char = '';
-                        idxEnd = currentText.length      -1;
-                        if(idxEnd < 0){
-                            idxEnd = 0;
-                        }
-                        currentText = currentText.substring(0, idxEnd)
+                      console.log('aaa')
+                      char = '';
+                      idxEnd = currentText.length - 1;
+                      if(idxEnd < 0){
+                          idxEnd = 0;
+                      }
+                      currentText = currentText.substring(0, idxEnd)
                     }
                     currentText = currentText + char
                     state = 0;
@@ -167,7 +155,7 @@
                 xCorner = positionsSet[i][0];
                 yCorner = positionsSet[i][1];
                 text = boxText[i][state];
-                ctx.fillText(text, xCorner+width*0.05, yCorner+height*0.05)
+                ctx.fillText(text, xCorner+width*0.05, yCorner+height*0.3)
             }
 
         }
@@ -188,6 +176,30 @@
             ctx.fillRect(x-3,y-3,6,6);
         }
     </script>
-    <canvas id="canvas", onload="init()", onmousemove="updateMousePos(event)", onclick='clear(event)', width="100%", height="100%">
-
+    <style>
+      body,html {
+        width:100%;
+        height:100%;
+        margin: 0;
+      }
+      #game {
+        width:100%;
+        height:100%;
+        z-index: 999999;
+      }
+      #gamepos {
+        width: 50px;
+        height: 50px;
+        background-color: pink;
+        display: block;
+        position: fixed;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- this canvas is styled to fill the whole page-->
+    <canvas id="game"></canvas>
+    <!-- this is our cursor, feel free to style as you like above -->
+    <div id="gamepos"></div>
+  </body>
 </html>
