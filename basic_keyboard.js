@@ -71,6 +71,8 @@ function init(){
   BAR_WIDTH = canvas.width * 0.1;
   BAR_HEIGHT = canvas.height;
   BAR_COLOR = "#0000FF";
+
+  SCROLL_SPEED = 30;
   
   // First button positions
   x_shift = BAR_WIDTH;
@@ -81,9 +83,6 @@ function init(){
               "Q","R","S","T","U","V","W","X",
               "Y","Z"];
 
-  // Draw selection
-  selection_timer = 0;
-
   buts = [];
   for(let i=0; i<26; i++){
     buts[i] = new Button(BUT_SPACING_X*i + x_shift,
@@ -93,6 +92,13 @@ function init(){
                          BUT_COLOR,
                          alphabet[i]);
   }
+
+  // Initialize selection
+  SEL_COLOR = "rgba(255,255,0, 0.5)";
+  selection = new Rect(0,0,0,0,SEL_COLOR);
+  selection_timer = 0;
+  selection_limit = Math.floor(FPS * 2/3);
+  button_selection = null
 
   // Scroll bar positions
   scroll_bar_l = new Bar(0,0,BAR_WIDTH,BAR_HEIGHT,BAR_COLOR);
@@ -118,13 +124,13 @@ function drawButs() {
 function scroll(x) { // x>0 to scroll right, x<0 to scroll left
   for(i=0; i<buts.length; i++){
     buts[i].x += x;
-    buts[i].x %= TOTAL_BUT_LENGTH;
-    // if (buts[i].x > TOTAL_BUT_LENGTH) {
-    //   buts[i].x -= TOTAL_BUT_LENGTH;
-    // }
-    // else if (buts[i].x < 10 * BUT_WIDTH) {
-    //   buts[i].x += TOTAL_BUT_LENGTH;
-    // }
+    // buts[i].x %= TOTAL_BUT_LENGTH;
+    if (buts[i].x > -10 * BUT_WIDTH + TOTAL_BUT_LENGTH) {
+      buts[i].x -= TOTAL_BUT_LENGTH;
+    }
+    if (buts[i].x < -10 * BUT_WIDTH) {
+      buts[i].x += TOTAL_BUT_LENGTH;
+    }
   }
 }
 
@@ -138,8 +144,9 @@ function getSelectedButton() {
 
 // Return (x,y) mouse pos
 function updateMousePos(event) {
-  x = event.clientX;
-  y = event.clientY;
+  const rect = canvas.getBoundingClientRect();
+  x = event.clientX - rect.left;
+  y = event.clientY - rect.top;
   cursor = [x,y];
 }
 
@@ -152,24 +159,33 @@ function loop(){
   clearCanvas();
   drawButs();
   drawBars();
-  
+
   if (scroll_bar_l.collides(cursor)) {
     selection_timer = 0;
-    scroll(20);
+    scroll(SCROLL_SPEED);
   }
   else if (scroll_bar_r.collides(cursor)) {
     selection_timer = 0;
-    scroll(-20);
+    scroll(-SCROLL_SPEED);
   }
   else {
-    button = getSelectedButton();
-    if (button !== null) {
+    button_selection = getSelectedButton();
+    if (button_selection !== null) {
       selection_timer += 1;
-      if (selection_timer >= Math.floor(FPS * 2/3)) {
+      if (selection_timer >= selection_limit) {
         selection_timer = 0;
-        document.getElementById("output").innerText += button.str;
+        document.getElementById("output").innerText += button_selection.str;
       }
     }
+  }
+
+  // Draw selection last
+  if (button_selection !== null) {
+    selection.width = BUT_WIDTH * (selection_timer/selection_limit);
+    selection.height = BUT_HEIGHT * (selection_timer/selection_limit);
+    selection.x = button_selection.x + button_selection.width/2 - selection.width/2;
+    selection.y = button_selection.y + button_selection.height/2 - selection.height/2;
+    selection.draw();
   }
 
   
