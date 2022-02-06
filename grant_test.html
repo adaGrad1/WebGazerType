@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html onload="init()">
+    <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+    <script>
+        offset = 0;
+        $(function() {
+            document.getElementById("test").innerHTML = 'init';
+            drawLetters();
+        });
+        function drawLetters() {
+            var canvas = document.getElementById("canvas");
+            var ctx = canvas.getContext("2d");
+            ctx.fillStyle = "#FF0000";
+            ctx.lineWidth = 15;
+            ctx.strokeRect(100,100,400,400);
+            ctx.strokeRect(100,550,400,400)
+            ctx.strokeRect(600,100,400,400);
+            ctx.strokeRect(600,550,400,400);
+
+        }
+        function update(event) {
+            var x = event.offsetX; //event.clientX
+            var y = event.offsetY; //event.clientY
+            var positionText= "X: " + x + ", Y: " + y;
+            //document.getElementById("test").innerHTML = positionText;
+
+            var canvas = document.getElementById("canvas");
+            var ctx = canvas.getContext("2d");
+            ctx.fillStyle = "#FF0000";
+            ctx.fillRect(x-5,y-5,10,10);
+            ctx.font = "30px Arial";
+            ctx.fillText("Hello World", 10, 50);
+        }
+    </script>
+    <div id="test"></div>
+    <canvas id="canvas", onload="init()", onmousemove="update(event)", onclick='clear(event)', width=1000, height=800, style="border:1px solid #c3c3c3;">
+
+</html>
