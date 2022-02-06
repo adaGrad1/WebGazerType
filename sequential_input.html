@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<div id="log"></div>
+<html onload="init()">
+    <!-- <script src="webgazer.js" type="text/javascript"></script>
+    <script src="main.js" type="text/javascript"></script> -->
+    <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+    <script>
+        //the html viewer i'm using doesn't let me see the console
+        //so we use this instead lol 
+        (function () {
+            var old = console.log;
+            var logger = document.getElementById('log');
+            console.log = function (message) {
+                if (typeof message == 'object') {
+                    logger.innerHTML += (JSON && JSON.stringify ? JSON.stringify(message) : message) + '<br />';
+                } else {
+                    logger.innerHTML += message + '<br />';
+                }
+            }
+        })();
+        //global variables sprinkled with some constants because this is a hackathon
+        state = 0;
+
+        //bro it's 11:41 pm
+        //im tired
+        const boxText = [
+            ['abcdef', 'a', 'g', 'm', 's', 'y', '_'],
+            ['ghijkl', 'b', 'h', 'n', 't', 'z', '⌫'],
+            ['mnopqr', 'c', 'i', 'o', 'u', '.', ''],
+            ['stuvwx', 'd', 'j', 'p', 'v', '!', ''],
+            ['yz.!?,', 'e', 'k', 'q', 'w', '?', ''],
+            ['_⌫',    'f', 'l', 'r', 'x', ',', '']];
+        positionsSet = [];
+        height = 0;
+        width = 0;
+        canvas = 0;
+        ctx = 0; 
+        cursorPos = [-1,-1];
+        currentText = ""
+        progressPortions = [0,0,0,0,0,0];
+
+
+        $(function() {
+            init();
+            drawBoxes();
+            drawTextForBox();
+            fillBox(2, 0.4);
+            
+        });
+
+        function overlapping(gazex, gazey, x, y, w, h) {
+            return (gazex > x && gazex < x + w && gazey > y && gazey < y + w);
+        }
+        
+
+        //runs at startup, sets up some friendly constants
+        function init(){
+            canvas = document.getElementById("canvas");
+            ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            height = canvas.height;
+            width = canvas.width;
+            for(i=0; i<=2; i++){
+                for(j=0; j<=1; j++){
+                    positionsSet[2*i+j] = [width*i*0.3333, height*j*0.5+height*0.05];
+                }
+            }
+            // Call this 20fps
+            window.setInterval(function(){
+                loop();
+            }, 1000 / 20)
+        }
+
+        function loop(){
+            //figure out which box the cursor is in
+            hoverIdx = -1;
+            for(i=0; i<=5; i++){
+                if(overlapping(cursorPos[0], cursorPos[1], positionsSet[i][0], positionsSet[i][1], width*0.33, height*0.4)){
+                    hoverIdx = i;
+                    break;
+                }
+            }
+            //update translucent box sizes
+            for(i=0; i<=5; i++){
+                progressPortions[i] -= 0.02;
+                if(progressPortions[i] < 0){
+                    progressPortions[i] = 0;
+                }
+            }
+            if(hoverIdx >= 0){
+                progressPortions[hoverIdx] += 0.04
+            }
+            //redraw main frame
+            ctx.fillStyle = "#FFFFFF";
+            ctx.fillRect(0, 0, width, height);
+            drawStatic();
+            //draw translucent overlay
+            for(i=0; i<=5; i++){
+                fillBox(i, progressPortions[i]);
+            }
+
+            //if progress of currently hovered box is >=0.99, then we do some logic based on that
+            if(progressPortions[hoverIdx] >= 0.99){
+                progressPortions = [0,0,0,0,0,0]
+                if(state == 0){
+                    state = hoverIdx+1;
+                } else{
+                    char = boxText[hoverIdx][state]; //idk if this one is correct but smth like this
+                    if(char == '_'){
+                        char = ' ';
+                    } else if(hoverIdx == 1 && state == 6){ // backspace
+                        console.log("BACKSPACE!");
+                        char = '';
+                        idxEnd = currentText.length      -1;
+                        if(idxEnd < 0){
+                            idxEnd = 0;
+                        }
+                        currentText = currentText.substring(0, idxEnd)
+                    }
+                    currentText = currentText + char
+                    state = 0;
+                }
+            }
+
+        }
+
+        function drawStatic(){
+            drawBoxes();
+            drawTextForBox();
+            drawCurrentText();
+        }
+
+        //draw the main six boxes on the screen
+        function drawBoxes() {
+            ctx.fillStyle = "#FF0000";
+            ctx.lineWidth = 15;
+            for(i=0; i<=5; i++){
+                ctx.strokeRect(positionsSet[i][0],positionsSet[i][1],width*0.33,height*0.4);
+            }
+        }
+        //fill a particular box with a translucent red progress box thingy
+        function fillBox(boxId, portion){
+            
+            xCorner = positionsSet[boxId][0]
+            yCorner = positionsSet[boxId][1]
+
+            xMiddle = xCorner + width*(0.33/2)
+            yMiddle = yCorner + height*(0.4/2)
+
+            xSizeH = (width*0.33/2)*portion
+            ySizeH = (height*0.4/2)*portion
+
+            ctx.globalAlpha = 0.2;
+            ctx.fillStyle = "#005599";
+            ctx.fillRect(xMiddle-xSizeH, yMiddle-ySizeH, 2*xSizeH, 2*ySizeH);
+            ctx.globalAlpha = 1.0;
+        }
+        
+        //uses the current value of state to figure out what to write in each text box
+        //for example, in box 0 for state 3, it would write 'm'
+        //or box 4 for state 0, it would write 'yz.!?,'
+        function drawTextForBox(){
+            ctx.font = "30px Arial";
+            ctx.fillStyle = "#000000"
+            for(i=0; i <= 5; i++){
+                xCorner = positionsSet[i][0];
+                yCorner = positionsSet[i][1];
+                text = boxText[i][state];
+                ctx.fillText(text, xCorner+width*0.05, yCorner+height*0.05)
+            }
+
+        }
+        function drawCurrentText(){
+            ctx.font = "30px Arial";
+            ctx.fillStyle = "#000000"
+            ctx.fillText(currentText, width*0.03, height*0.5)
+
+        }
+
+        //writes the position of the mouse to the global cursorPos variable
+        //also draws some fun red rectangles so you know it's being called and your page didnt crash lol
+        function updateMousePos(event) {
+            var x = event.offsetX; //event.clientX
+            var y = event.offsetY; //event.clientY
+            cursorPos = [x, y];
+            ctx.fillStyle = "#FF0000";
+            ctx.fillRect(x-3,y-3,6,6);
+        }
+    </script>
+    <canvas id="canvas", onload="init()", onmousemove="updateMousePos(event)", onclick='clear(event)', width="100%", height="100%">
+
+</html>
