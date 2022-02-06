@@ -1,5 +1,7 @@
 $().ready(function(){
 
+  // webgazer.showVideo(false);
+  webgazer.saveDataAcrossSessions(false)
   // this starts the library
   f = webgazer.setGazeListener(function(data, elapsedTime) {
     if (data == null) {
@@ -10,8 +12,8 @@ $().ready(function(){
   }).begin();
 
   // these store the last 50 coordinates of eye pos
-  var queuex = [];
-  var queuey = [];
+  queuex = [];
+  queuey = [];
 
   function mean(arr) {
     if(arr.length < 1) {
@@ -26,11 +28,11 @@ $().ready(function(){
       var OF = $("#webgazerGazeDot").offset();
 
       queuex.push(OF.left);
-      if(queuex.length > 50) {
+      if(queuex.length > 20) {
         queuex.shift();
       }
       queuey.push(OF.top);
-      if(queuey.length > 50) {
+      if(queuey.length > 20) {
         queuey.shift();
       }
     }, 10);
@@ -46,8 +48,10 @@ $().ready(function(){
 
 function getX() {
   return $("#gamepos").offset().left;
+  // return mean(queuex);
 }
 
 function getY() {
   return $("#gamepos").offset().top;
+  // return mean(queuey);
 }

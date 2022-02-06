@@ -41,10 +41,10 @@ class Button extends Rect {
 
   draw() {
     super.draw();
-    
+
     // Draw letter too
-    ctx.font = '48px serif';
-    ctx.textAlign="center"; 
+    ctx.font = '150px Arial';
+    ctx.textAlign="center";
     ctx.textBaseline = "middle";
     ctx.fillStyle = "#000000";
     ctx.fillText(this.str,
@@ -57,23 +57,24 @@ function init(){
   // Set canvas and rectangle dimensions
   canvas = document.getElementById("canvas");
   ctx = canvas.getContext('2d');
-  canvas.style.backgroundColor = "#33FFFF";
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  
-  BUT_WIDTH = canvas.width * 0.2;
-  BUT_HEIGHT = canvas.height * 0.3;
+  canvas.style.backgroundColor = "white";
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = window.innerWidth - rect.left;
+  canvas.height = window.innerHeight - rect.top;
+
+  BUT_WIDTH = canvas.width * 0.4;
+  BUT_HEIGHT = canvas.height * 0.5;
   BUT_SPACING_X = BUT_WIDTH * 1.3;
-  BUT_SPACING_Y = BUT_HEIGHT * 0.7;
-  BUT_COLOR = "#FF0000";
+  BUT_SPACING_Y = canvas.height * 0.2;
+  BUT_COLOR = "#3EB489";
   TOTAL_BUT_LENGTH = BUT_SPACING_X * 26;
 
-  BAR_WIDTH = canvas.width * 0.1;
+  BAR_WIDTH = canvas.width * 0.2;
   BAR_HEIGHT = canvas.height;
-  BAR_COLOR = "#0000FF";
+  BAR_COLOR = "#E6E6FA";
 
-  SCROLL_SPEED = 30;
-  
+  SCROLL_SPEED = 60;
+
   // First button positions
   x_shift = BAR_WIDTH;
   y_shift = BUT_HEIGHT * 0.2;
@@ -97,13 +98,13 @@ function init(){
   SEL_COLOR = "rgba(255,255,0, 0.5)";
   selection = new Rect(0,0,0,0,SEL_COLOR);
   selection_timer = 0;
-  selection_limit = Math.floor(FPS * 2/3);
+  selection_limit = Math.floor(FPS * 4/3);
   button_selection = null
 
   // Scroll bar positions
-  scroll_bar_l = new Bar(0,0,BAR_WIDTH,BAR_HEIGHT,BAR_COLOR);
-  scroll_bar_r = new Bar(canvas.width-BAR_WIDTH,0,BAR_WIDTH,BAR_HEIGHT,BAR_COLOR);
-  
+  scroll_bar_l = new Button(0,0,BAR_WIDTH,BAR_HEIGHT,BAR_COLOR, "<<");
+  scroll_bar_r = new Button(canvas.width-BAR_WIDTH,0,BAR_WIDTH,BAR_HEIGHT,BAR_COLOR, ">>");
+
   // Run at 30fps
   window.setInterval(function(){
       loop();
@@ -143,11 +144,11 @@ function getSelectedButton() {
 }
 
 // Return (x,y) mouse pos
-function updateMousePos(event) {
+function updateMousePos() {
   const rect = canvas.getBoundingClientRect();
-  x = event.clientX - rect.left;
-  y = event.clientY - rect.top;
-  cursor = [x,y];
+  x = getX() - rect.left;
+  y = getY() - rect.top;
+  cursor = [x, y];
 }
 
 function clearCanvas() {
@@ -159,7 +160,10 @@ function loop(){
   clearCanvas();
   drawButs();
   drawBars();
-
+  updateMousePos();
+  if($("#output").text() != "BIG CHUNGUS") {
+    $("#output").css("visibility", "visible");
+  }
   if (scroll_bar_l.collides(cursor)) {
     selection_timer = 0;
     scroll(SCROLL_SPEED);
@@ -188,7 +192,7 @@ function loop(){
     selection.draw();
   }
 
-  
+
 }
 
 window.onload = init();

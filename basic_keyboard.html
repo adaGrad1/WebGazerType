@@ -1,9 +1,38 @@
 <html>
   <head>
-    <h1> Visual Keyboard </h1>
-    <h3 id="output"> </h3>
-    <canvas id="canvas" onmousemove = "updateMousePos(event)" width="300" height="300"></canvas>
-    <script src="basic_keyboard.js"></script>
+    <style>
+      #output {
+        text-align:center;
+        font-size: 200%;
+        visibility: hidden;
+      }
+      h1 {
+        text-align:center;
+      }
+      #gamepos {
+        width: 50px;
+        height: 50px;
+        background-color: pink;
+        display: block;
+        position: fixed;
+        opacity: 1.0;
+      }
+      * {
+        font-family: "Arial";
+      }
+    </style>
   </head>
-  <body></body>
+  <body>
+    <div id="gamepos"></div>
+    <h1> Visual Keyboard </h1>
+    <div height="150px">
+      <h3 id="output">BIG CHUNGUS</h3>
+    </div>
+
+    <script src="jquery-3.6.0.min.js"></script>
+    <script src="webgazer.js" type="text/javascript"></script>
+    <script src="main.js" type="text/javascript"></script>
+    <canvas id="canvas" width="300" height="300"></canvas>
+    <script src="basic_keyboard.js"></script>
+  </body>
 </html>
