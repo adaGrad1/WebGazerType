@@ -1,7 +1,7 @@
 # WebGazerType
 WebGazer-based gaze keyboard
 
-The WebGazer library needs an http server to run, so you can run `python -m http.server --bind 127.0.0.1` in the same directory of integrated_sequential.html or basic_keyboard.html (It might also work without one, so you could try opening integrated_sequential.html or basic_keyboard.html directly without starting a server).
+The WebGazer library needs an http server to run, so you can run `python -m http.server --bind 127.0.0.1` in the same directory of integrated_sequential.html or basic_keyboard.html (It might also work without one, so you could try opening integrated_sequential.html or basic_keyboard.html directly without starting a server). What worked for some people was running python -m http.server [port number here] in the directory of integrated_sequential.html and then putting http://localhost:[port number here]/integrated_sequential.html into the search bar.
 
 How to use integrated_sequential.html:
 1. Wait for the camera to load in the upper-left. Tracking dots should appear at key points on your face.
